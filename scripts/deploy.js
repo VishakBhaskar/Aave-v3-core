@@ -110,61 +110,6 @@ async function main() {
   console.log(
     `PriceOracleSentinel deployed to : ${priceOracleSentinel.address}`
   );
-  console.log("Borrow Logic is: ", borrowLogic);
-
-  // Deploy pool
-  const Pool = await hre.ethers.getContractFactory("Pool", {
-    libraries: {
-      BorrowLogic: borrowLogic,
-      BridgeLogic: bridgeLogic,
-      EModeLogic: emodeLogic,
-      FlashLoanLogic: flashLoanLogic,
-      LiquidationLogic: liquidationLogic,
-      PoolLogic: poolLogic,
-      SupplyLogic: supplyLogic,
-    },
-  });
-
-  const pool = await Pool.deploy(`${poolAddressesProvider.address}`);
-
-  await pool.deployed();
-
-  console.log(`Pool deployed to : ${pool.address}`);
-
-  // Deploy L2 pool
-  const L2Pool = await hre.ethers.getContractFactory("L2Pool", {
-    libraries: {
-      BorrowLogic: borrowLogic,
-      BridgeLogic: bridgeLogic,
-      EModeLogic: emodeLogic,
-      FlashLoanLogic: flashLoanLogic,
-      LiquidationLogic: liquidationLogic,
-      PoolLogic: poolLogic,
-      SupplyLogic: supplyLogic,
-    },
-  });
-
-  const l2pool = await L2Pool.deploy(`${poolAddressesProvider.address}`);
-
-  await l2pool.deployed();
-
-  console.log(`L2Pool deployed to : ${l2pool.address}`);
-
-  // Deploy PoolConfigurator
-  const PoolConfigurator = await hre.ethers.getContractFactory(
-    "PoolConfigurator",
-    {
-      libraries: {
-        ConfiguratorLogic: configuratorLogic,
-      },
-    }
-  );
-
-  const poolConfigurator = await PoolConfigurator.deploy();
-
-  await poolConfigurator.deployed();
-
-  console.log(`PoolConfigurator deployed to : ${poolConfigurator.address}`);
 
   //Deploy PoolStorage
   const PoolStorage = await hre.ethers.getContractFactory("PoolStorage");
@@ -255,6 +200,59 @@ async function main() {
   console.log(
     `DefaultReserveInterestRateStrategy deployed to : ${defaultReserveInterestRateStrategy.address}`
   );
+  // Deploy PoolConfigurator
+  const PoolConfigurator = await hre.ethers.getContractFactory(
+    "PoolConfigurator",
+    {
+      libraries: {
+        ConfiguratorLogic: configuratorLogic,
+      },
+    }
+  );
+
+  const poolConfigurator = await PoolConfigurator.deploy();
+
+  await poolConfigurator.deployed();
+
+  console.log(`PoolConfigurator deployed to : ${poolConfigurator.address}`);
+
+  // Deploy pool
+  const Pool = await hre.ethers.getContractFactory("Pool", {
+    libraries: {
+      BorrowLogic: borrowLogic,
+      BridgeLogic: bridgeLogic,
+      EModeLogic: emodeLogic,
+      FlashLoanLogic: flashLoanLogic,
+      LiquidationLogic: liquidationLogic,
+      PoolLogic: poolLogic,
+      SupplyLogic: supplyLogic,
+    },
+  });
+
+  const pool = await Pool.deploy(`${poolAddressesProvider.address}`);
+
+  await pool.deployed();
+
+  console.log(`Pool deployed to : ${pool.address}`);
+
+  // Deploy L2 pool
+  const L2Pool = await hre.ethers.getContractFactory("L2Pool", {
+    libraries: {
+      BorrowLogic: borrowLogic,
+      BridgeLogic: bridgeLogic,
+      EModeLogic: emodeLogic,
+      FlashLoanLogic: flashLoanLogic,
+      LiquidationLogic: liquidationLogic,
+      PoolLogic: poolLogic,
+      SupplyLogic: supplyLogic,
+    },
+  });
+
+  const l2pool = await L2Pool.deploy(`${poolAddressesProvider.address}`);
+
+  await l2pool.deployed();
+
+  console.log(`L2Pool deployed to : ${l2pool.address}`);
 
   fs.writeFileSync(
     "./config.js",
