@@ -7,7 +7,7 @@
 const hre = require("hardhat");
 const fs = require("fs");
 const { ethers } = require("hardhat");
-//for local testing
+// for local testing
 // const {
 //   borrowLogic,
 //   bridgeLogic,
@@ -111,6 +111,40 @@ async function main() {
     `PriceOracleSentinel deployed to : ${priceOracleSentinel.address}`
   );
 
+  /// Deploy DefaultReserveInterestRateStrategy
+  const DefaultReserveInterestRateStrategy =
+    await hre.ethers.getContractFactory("DefaultReserveInterestRateStrategy");
+
+  const optimalUsageRatio = ethers.BigNumber.from(450000000000000000000000000n);
+  const variableRateSlope1 = ethers.BigNumber.from(70000000000000000000000000n);
+  const variableRateSlope2 =
+    ethers.BigNumber.from(3000000000000000000000000000n);
+  const baseStableRateOffset =
+    ethers.BigNumber.from(800000000000000000000000000n);
+  const stableRateExcessOffset =
+    ethers.BigNumber.from(550000000000000000000000000n);
+  const optimalStableToTotalDebtRatio =
+    ethers.BigNumber.from(200000000000000000000000000n);
+
+  const defaultReserveInterestRateStrategy =
+    await DefaultReserveInterestRateStrategy.deploy(
+      `${poolAddressesProvider.address}`,
+      optimalUsageRatio,
+      0,
+      variableRateSlope1,
+      variableRateSlope2,
+      0,
+      0,
+      baseStableRateOffset,
+      stableRateExcessOffset,
+      optimalStableToTotalDebtRatio
+    );
+
+  await defaultReserveInterestRateStrategy.deployed();
+
+  console.log(
+    `DefaultReserveInterestRateStrategy deployed to : ${defaultReserveInterestRateStrategy.address}`
+  );
   //Deploy PoolStorage
   const PoolStorage = await hre.ethers.getContractFactory("PoolStorage");
 
@@ -119,6 +153,58 @@ async function main() {
   await poolStorage.deployed();
 
   console.log(`PoolStorage deployed to : ${poolStorage.address}`);
+
+  // Deploy AaveProtocolDataProvider
+  const AaveProtocolDataProvider = await hre.ethers.getContractFactory(
+    "AaveProtocolDataProvider"
+  );
+
+  const aaveProtocolDataProvider = await AaveProtocolDataProvider.deploy(
+    `${poolAddressesProvider.address}`
+  );
+
+  await aaveProtocolDataProvider.deployed();
+
+  console.log(
+    `AaveProtocolDataProvider deployed to : ${aaveProtocolDataProvider.address}`
+  );
+
+  // // Deploy PoolConfigurator
+  // const PoolConfigurator = await hre.ethers.getContractFactory(
+  //   "PoolConfigurator",
+  //   {
+  //     libraries: {
+  //       ConfiguratorLogic: configuratorLogic,
+  //     },
+  //   }
+  // );
+
+  // const poolConfigurator = await PoolConfigurator.deploy();
+
+  // await poolConfigurator.deployed();
+
+  // console.log(`PoolConfigurator deployed to : ${poolConfigurator.address}`);
+
+  const l2pool = {};
+  l2pool.address = "0x6C9fB0D5bD9429eb9Cd96B85B81d872281771E6B";
+  // // Deploy L2 pool
+  // const L2Pool = await hre.ethers.getContractFactory("L2Pool", {
+  //   libraries: {
+  //     BorrowLogic: borrowLogic,
+  //     BridgeLogic: bridgeLogic,
+  //     EModeLogic: emodeLogic,
+  //     FlashLoanLogic: flashLoanLogic,
+  //     LiquidationLogic: liquidationLogic,
+  //     PoolLogic: poolLogic,
+  //     SupplyLogic: supplyLogic,
+  //   },
+  // });
+
+  // const l2pool = await L2Pool.deploy(`${poolAddressesProvider.address}`);
+
+  // await l2pool.deployed();
+
+  // console.log(`L2Pool deployed to : ${l2pool.address}`);
 
   // Deploy AToken
   const AToken = await hre.ethers.getContractFactory("AToken");
@@ -166,94 +252,6 @@ async function main() {
 
   console.log(`VariableDebtToken deployed to : ${variableDebtToken.address}`);
 
-  /// Deploy DefaultReserveInterestRateStrategy
-  const DefaultReserveInterestRateStrategy =
-    await hre.ethers.getContractFactory("DefaultReserveInterestRateStrategy");
-
-  const optimalUsageRatio = ethers.BigNumber.from(450000000000000000000000000n);
-  const variableRateSlope1 = ethers.BigNumber.from(70000000000000000000000000n);
-  const variableRateSlope2 =
-    ethers.BigNumber.from(3000000000000000000000000000n);
-  const baseStableRateOffset =
-    ethers.BigNumber.from(800000000000000000000000000n);
-  const stableRateExcessOffset =
-    ethers.BigNumber.from(550000000000000000000000000n);
-  const optimalStableToTotalDebtRatio =
-    ethers.BigNumber.from(200000000000000000000000000n);
-
-  const defaultReserveInterestRateStrategy =
-    await DefaultReserveInterestRateStrategy.deploy(
-      `${poolAddressesProvider.address}`,
-      optimalUsageRatio,
-      0,
-      variableRateSlope1,
-      variableRateSlope2,
-      0,
-      0,
-      baseStableRateOffset,
-      stableRateExcessOffset,
-      optimalStableToTotalDebtRatio
-    );
-
-  await defaultReserveInterestRateStrategy.deployed();
-
-  console.log(
-    `DefaultReserveInterestRateStrategy deployed to : ${defaultReserveInterestRateStrategy.address}`
-  );
-  // Deploy PoolConfigurator
-  const PoolConfigurator = await hre.ethers.getContractFactory(
-    "PoolConfigurator",
-    {
-      libraries: {
-        ConfiguratorLogic: configuratorLogic,
-      },
-    }
-  );
-
-  const poolConfigurator = await PoolConfigurator.deploy();
-
-  await poolConfigurator.deployed();
-
-  console.log(`PoolConfigurator deployed to : ${poolConfigurator.address}`);
-
-  // Deploy pool
-  const Pool = await hre.ethers.getContractFactory("Pool", {
-    libraries: {
-      BorrowLogic: borrowLogic,
-      BridgeLogic: bridgeLogic,
-      EModeLogic: emodeLogic,
-      FlashLoanLogic: flashLoanLogic,
-      LiquidationLogic: liquidationLogic,
-      PoolLogic: poolLogic,
-      SupplyLogic: supplyLogic,
-    },
-  });
-
-  const pool = await Pool.deploy(`${poolAddressesProvider.address}`);
-
-  await pool.deployed();
-
-  console.log(`Pool deployed to : ${pool.address}`);
-
-  // Deploy L2 pool
-  const L2Pool = await hre.ethers.getContractFactory("L2Pool", {
-    libraries: {
-      BorrowLogic: borrowLogic,
-      BridgeLogic: bridgeLogic,
-      EModeLogic: emodeLogic,
-      FlashLoanLogic: flashLoanLogic,
-      LiquidationLogic: liquidationLogic,
-      PoolLogic: poolLogic,
-      SupplyLogic: supplyLogic,
-    },
-  });
-
-  const l2pool = await L2Pool.deploy(`${poolAddressesProvider.address}`);
-
-  await l2pool.deployed();
-
-  console.log(`L2Pool deployed to : ${l2pool.address}`);
-
   fs.writeFileSync(
     "./config.js",
     `//SequencerOracle deployed to : "${sequencerOracle.address}"
@@ -261,13 +259,13 @@ async function main() {
       //ACLManager deployed to : "${aclManager.address}"
       //PoolAddressesProviderRegistry deployed to : "${poolAddressesProviderRegistry.address}"
       //PriceOracleSentinel deployed to : "${priceOracleSentinel.address}"
-      //L2Pool deployed to : "${l2pool.address}"
       //PoolConfigurator deployed to : ${poolConfigurator.address}
       //PoolStorage deployed to :  ${poolStorage.address}
       //AToken deployed to : ${aToken.address}
       ///DelegationAwareAToken deployed to : ${delegationAwareAToken.address}
       //StableDebtToken deployed to : ${stableDebtToken.address}
       //VariableDebtToken deployed to : ${variableDebtToken.address}
+      // L2Pool deployed to : "${l2pool.address}"
       //DefaultReserveInterestRateStrategy deployed to : ${defaultReserveInterestRateStrategy.address}`
   );
 }
